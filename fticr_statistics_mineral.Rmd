@@ -1,0 +1,257 @@
+---
+title: "FTICR-MS:Mineral"
+author: "William Rodriguez"
+output:
+  html_notebook: default
+  pdf_document: default
+---
+
+# Load R packages
+
+```{r}
+rm(list=ls())
+library(ftmsRanalysis)
+```
+
+
+# Sample Data
+```{r}
+fdata <- read.delim('input/FTICR_metadata.txt')
+fdata <- fdata[fdata$Horizon %in% "Mineral",]
+str(fdata)
+```
+
+# FTICR MS Data
+```{r}
+mydata = read.delim('input/FTICR_data.txt')
+```
+
+# Expression Data
+
+```{r}
+edata <- subset(mydata,select=c("Mass",fdata$Sample_ID))
+str(edata)
+```
+
+# Molecular Indentification Data
+
+```{r}
+emeta <- subset(mydata,select=c("Mass","C","H","O","N","C13",
+                                "S","P","Error_ppm","NeutralMass"))
+str(emeta)
+```
+
+
+# PeakData Object
+
+```{r}
+peakObj <- as.peakData(e_data = edata,f_data = fdata,e_meta = emeta,
+                       edata_cname = "Mass",fdata_cname = "Sample_ID",
+                       mass_cname = "Mass",c_cname="C", h_cname="H",
+                       o_cname="O", n_cname="N", s_cname="S",
+                       p_cname="P", isotopic_cname = "C13",
+                       isotopic_notation = "1")
+peakObj
+```
+
+"Currently, any peaks that are isotopic are removed from the dataset, as available methods (e.g. Van Krevelen plot) are not applicable to these peaks."
+
+
+## Elements
+
+```{r}
+names(peakObj)
+```
+
+## Calculated Molecular Formula
+
+```{r}
+tail(peakObj$e_meta)
+```
+
+## Summary
+
+```{r}
+summary(peakObj)
+```
+
+## Plotting (Default; presence/absence)
+
+```{r}
+plot(peakObj)
+```
+
+# Preprocessing
+
+Transforming abundance values to log2
+
+```{r}
+peakObj <- edata_transform(peakObj, data_scale="log2")
+```
+
+plotting
+
+```{r}
+plot(peakObj)
+```
+
+# Calculating meta-data
+
+```{r}
+peakObj <- compound_calcs(peakObj)
+peakObj
+```
+
+## Compounds by Elements
+
+```{r}
+peakObj <- assign_elemental_composition(peakObj)
+table(peakObj$e_meta[,getElCompColName(peakObj)])
+```
+
+## Compounds by Class
+
+```{r}
+peakObj <- assign_class(peakObj, boundary_set = "bs1")
+table(peakObj$e_meta[, getBS1ColName(peakObj)])
+```
+*Something is going on boundary_set argument when bs2 or bs3 selected.
+
+## Filtering
+
+Before filtering
+
+```{r}
+summary(peakObj)
+```
+
+After filtering
+
+
+```{r}
+filter_obj <- mass_filter(peakObj)
+plot(filter_obj, min_mass=200, max_mass=900)
+```
+
+
+```{r}
+peakObj <- applyFilt(filter_obj, peakObj, min_mass = 200,
+                  max_mass = 900)
+summary(peakObj)
+```
+
+```{r}
+peakObj
+```
+
+Other filters
+
+```{r}
+# minimum number to be observed across all samples in order to retain the biomolecule
+peakObj <- applyFilt(molecule_filter(peakObj), peakObj, min_num=2)
+# remove biomolec without molecular formula; remove=NoFormula)
+peakObj <- applyFilt(formula_filter(peakObj), peakObj)
+summary(peakObj)
+```
+
+## Comparison of Experimental Groups
+
+```{r}
+peakObj <- group_designation(peakObj, main_effects=c("Treatment"))
+getGroupDF(peakObj)
+```
+## Group-level Summary per Peak
+
+```{r}
+group_summary <- summarizeGroups(peakObj, summary_functions =
+                                   c("n_present", "prop_present"))
+head(group_summary$e_data)
+```
+
+## NOSC Distrubution
+
+```{r,fig.width=10, fig.height=6}
+p <- densityPlot(peakObj, samples=FALSE, groups=c("Control","Heated"), variable="NOSC",title="Comparison of NOSC Between Experimental Plots: Mineral Horizon")
+p
+```
+## Compounds Distribution
+
+```{r}
+byGroup <- divideByGroupComparisons(peakObj,
+                                comparisons = "all")[[1]]$value
+```
+
+### Available Summary Options
+
+```{r}
+getGroupComparisonSummaryFunctionNames()
+```
+
+## Determine Unique and Common Masses/Peaks: g-test
+
+> "Use a g-test to compare two groups and determine which peaks are uniquely expressed in each group based on a p-value threshold."
+
+```{r}
+mineral_unique <- summarizeGroupComparisons(byGroup,
+            summary_functions="uniqueness_gtest",
+            summary_function_params=list(
+                  uniqueness_gtest=list(pres_fn="nsamps",
+                          pres_thresh=1, pvalue_thresh=0.1)))
+
+head(mineral_unique$e_data)
+```
+
+```{r}
+mineral_unique
+```
+
+
+
+### Plotting - Van Krevelen
+
+```{r,fig.width=10, fig.height=6}
+vanKrevelenPlot(mineral_unique, colorCName = "uniqueness_gtest")
+```
+Compounds breakdown
+
+```{r}
+table(mineral_unique$e_data$uniqueness_gtest)
+```
+
+
+## Determine Unique and Common Masses/Peaks: g-test
+
+> "Use number of samples for which a mass/peak is present to compare two groups and determine which peaks are uniquely expressed in each group."
+
+
+```{r}
+mineral_unique <- summarizeGroupComparisons(byGroup,
+            summary_functions="uniqueness_nsamps",
+            summary_function_params=list(
+                  uniqueness_nsamps=list(pres_thresh=1, absn_thresh=0)))
+
+head(mineral_unique$e_data)
+```
+
+```{r}
+mineral_unique
+```
+
+
+### Plotting - Van Krevelen
+
+```{r,fig.width=10, fig.height=6}
+vanKrevelenPlot(mineral_unique, colorCName = "uniqueness_nsamps")
+```
+
+
+Compounds breakdown
+
+```{r}
+table(mineral_unique$e_data$uniqueness_nsamps)
+```
+
+
+
+
+
