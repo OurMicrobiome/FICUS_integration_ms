@@ -117,10 +117,6 @@ table(peakObj$e_meta[, getBS1ColName(peakObj)])
 
 ## Filtering
 
-```{r}
-filter_obj <- mass_filter(peakObj)
-plot(filter_obj, min_mass=200, max_mass=900)
-```
 Before filtering
 
 ```{r}
@@ -128,6 +124,13 @@ summary(peakObj)
 ```
 
 After filtering
+
+
+```{r}
+filter_obj <- mass_filter(peakObj)
+plot(filter_obj, min_mass=200, max_mass=900)
+```
+
 
 ```{r}
 peakObj <- applyFilt(filter_obj, peakObj, min_mass = 200,
@@ -166,7 +169,7 @@ head(group_summary$e_data)
 ## NOSC Distrubution
 
 ```{r}
-densityPlot(peakObj, samples=FALSE, groups=c("Control","Heated"), variable="NOSC",title="Comparison of NOSC Between Experimental Plots in the Organic Horizon")
+densityPlot(peakObj, samples=FALSE, groups=c("Control","Heated"), variable="NOSC",title="Comparison of NOSC Between Experimental Plots: Organic Horizon")
 ```
 ## Compounds Distribution
 
@@ -175,10 +178,15 @@ byGroup <- divideByGroupComparisons(peakObj,
                                 comparisons = "all")[[1]]$value
 ```
 
+### Available Summary Options
+
 ```{r}
-# Summary functions options
 getGroupComparisonSummaryFunctionNames()
 ```
+
+## Determine Unique and Common Masses/Peaks: g-test
+
+> "Use a g-test to compare two groups and determine which peaks are uniquely expressed in each group based on a p-value threshold."
 
 ```{r}
 organic_unique <- summarizeGroupComparisons(byGroup,
@@ -190,6 +198,12 @@ organic_unique <- summarizeGroupComparisons(byGroup,
 head(organic_unique$e_data)
 ```
 
+```{r}
+organic_unique
+```
+
+
+
 ### Plotting - Van Krevelen
 
 ```{r}
@@ -197,17 +211,29 @@ vanKrevelenPlot(organic_unique, colorCName = "uniqueness_gtest")
 ```
 
 
+## Determine Unique and Common Masses/Peaks: g-test
+
+> "Use number of samples for which a mass/peak is present to compare two groups and determine which peaks are uniquely expressed in each group."
 
 
+```{r}
+organic_unique <- summarizeGroupComparisons(byGroup,
+            summary_functions="uniqueness_nsamps",
+            summary_function_params=list(
+                  uniqueness_nsamps=list(pres_thresh=1, absn_thresh=0)))
+
+head(organic_unique$e_data)
+```
+
+```{r}
+organic_unique
+```
 
 
+### Plotting - Van Krevelen
 
-
-
-
-
-
-
-
+```{r}
+vanKrevelenPlot(organic_unique, colorCName = "uniqueness_nsamps")
+```
 
 
