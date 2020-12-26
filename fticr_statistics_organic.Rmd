@@ -1,7 +1,9 @@
 ---
 title: "FTICR-MS:Organic"
-output: html_notebook
 author: "William Rodriguez"
+output:
+  html_notebook: default
+  pdf_document: default
 ---
 
 # Load R packages
@@ -168,8 +170,9 @@ head(group_summary$e_data)
 
 ## NOSC Distrubution
 
-```{r}
-densityPlot(peakObj, samples=FALSE, groups=c("Control","Heated"), variable="NOSC",title="Comparison of NOSC Between Experimental Plots: Organic Horizon")
+```{r,fig.width=10, fig.height=6}
+p <- densityPlot(peakObj, samples=FALSE, groups=c("Control","Heated"), variable="NOSC",title="Comparison of NOSC Between Experimental Plots: Organic Horizon")
+p
 ```
 ## Compounds Distribution
 
@@ -206,8 +209,14 @@ organic_unique
 
 ### Plotting - Van Krevelen
 
-```{r}
+```{r,fig.width=10, fig.height=6}
 vanKrevelenPlot(organic_unique, colorCName = "uniqueness_gtest")
+```
+
+Compounds breakdown
+
+```{r}
+table(organic_unique$e_data$uniqueness_gtest)
 ```
 
 
@@ -232,8 +241,14 @@ organic_unique
 
 ### Plotting - Van Krevelen
 
-```{r}
+```{r,fig.width=10, fig.height=6}
 vanKrevelenPlot(organic_unique, colorCName = "uniqueness_nsamps")
+```
+
+Compounds breakdown
+
+```{r}
+table(organic_unique$e_data$uniqueness_nsamps)
 ```
 
 
