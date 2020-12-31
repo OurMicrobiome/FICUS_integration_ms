@@ -1,0 +1,9 @@
+plugins:
+  - jekyll-relative-links
+relative_links:
+  enabled: true
+  collections: true
+include:
+  - README.md
+  - fticr_statistics_mineral.nb.html
+  - fticr_statistics_organic.nb.html
