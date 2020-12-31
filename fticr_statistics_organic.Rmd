@@ -168,7 +168,7 @@ head(group_summary$e_data)
 
 ## NOSC Distrubution
 
-```{r}
+```{r,fig.width=10, fig.height=6}
 densityPlot(peakObj, samples=FALSE, groups=c("Control","Heated"), variable="NOSC",title="Comparison of NOSC Between Experimental Plots: Organic Horizon")
 ```
 ## Compounds Distribution
