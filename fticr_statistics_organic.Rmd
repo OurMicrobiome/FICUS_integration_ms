@@ -206,9 +206,17 @@ organic_unique
 
 ### Plotting - Van Krevelen
 
-```{r}
+```{r,fig.width=10, fig.height=6}
 vanKrevelenPlot(organic_unique, colorCName = "uniqueness_gtest")
 ```
+
+
+Compounds breakdown
+
+```{r}
+table(organic_unique$e_data$uniqueness_nsamps)
+```
+
 
 
 ## Determine Unique and Common Masses/Peaks: g-test
@@ -232,8 +240,17 @@ organic_unique
 
 ### Plotting - Van Krevelen
 
-```{r}
+```{r,fig.width=10, fig.height=6}
 vanKrevelenPlot(organic_unique, colorCName = "uniqueness_nsamps")
 ```
+
+
+Compounds breakdown
+
+```{r}
+table(organic_unique$e_data$uniqueness_nsamps)
+```
+
+
 
 
