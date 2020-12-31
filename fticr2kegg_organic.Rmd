@@ -1,0 +1,42 @@
+---
+title: "FTICR to KEGG: organic"
+output: html_notebook
+---
+
+# Load R packages
+
+```{r}
+# Clean workspace
+rm(list=ls())
+
+library(ftmsRanalysis)
+library(KEGGdata)
+```
+
+
+# Import Summarized Peaks <br>
+__uniqueness_nsamps__ was the method applied to the `organicUnique.Robj`, which is an R object.
+
+```{r}
+load(file="organicUnique.Robj")
+```
+
+# Processing
+
+```{r}
+# str(organic_unique)
+# Peaks breakdown by group
+groupSummary <- organic_unique$e_data
+# Peaks metadata
+groupMetadata <- organic_unique$e_meta[c("Mass","MolForm","bs1_class")]
+# Combine data 
+groupData <- merge(groupSummary,groupMetadata,by="Mass")
+head(groupData)
+```
+
+## Map MolForm to KEGG
+
+```{r}
+
+```
+
