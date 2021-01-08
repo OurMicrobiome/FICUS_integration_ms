@@ -1,0 +1,143 @@
+---
+title: "FTICR Visualizations"
+output: html_notebook
+---
+
+
+```{r}
+# Clean workspace
+rm(list=ls())
+
+library("ftmsRanalysis")
+library("vegan")
+library("ggplot2")
+library("ape")
+library("ggVennDiagram")
+library("reshape2")
+```
+
+
+# Load Peak Object
+
+```{r}
+load("ficusPeakObj.Robj")
+str(peakObj)
+```
+
+```{r}
+peakObj
+```
+
+
+### Binary Matrix
+
+```{r}
+# Set rownames
+edata <- peakObj$e_data
+rownames(edata) <- as.character(edata$Mass)
+edata$Mass <- NULL
+# Binary matrix
+edata.binary <- apply(edata,2,function(y)as.numeric(y>0))
+# Na's as zero
+edata.binary[is.na(edata.binary)] <- 0
+# As dataframe edata.binary
+edata.binary <- as.data.frame(edata.binary)
+# Add Mass to binary matrix
+edata.binary$Mass <- rownames(edata)
+# Add metadata to binary matrix
+tmp <- peakObj$e_meta[,c("Mass","bs1_class")] # save to tmp; direct merge isn't working
+str(tmp)
+# Merge 
+edata.binary <- merge(edata.binary,tmp,by="Mass",all = T)
+# Remove Mass column from df
+edata.binary$Mass <- NULL
+```
+
+
+```{r}
+# Carbon compounds #
+carbon.cpds <- aggregate(.~bs1_class,data=edata.binary,FUN=sum)
+# Transfor count to relative abundance #
+carbon.cpds[,-1] <- decostand(carbon.cpds[,-1],method = "total",MARGIN = 2)*100
+# Sum check
+colSums(carbon.cpds[,-1])
+```
+
+```{r}
+# melt df #
+carbon.cpds <- melt(carbon.cpds,variable.name = "Sample_ID")
+# Add sample info
+carbon.cpds <- merge(carbon.cpds,peakObj$f_data,by="Sample_ID")
+head(carbon.cpds)
+```
+
+```{r,fig.width=15}
+# Color palette #
+pal12 <- c("#A6CEE3", "#1F78B4", "#B2DF8A", "#33A02C", "#FB9A99","#E31A1C", "#FDBF6F", "#FF7F00", "#CAB2D6", "#6A3D9A","#FFFF99", "#B15928")
+# New color palette #
+pal4 <- c("#1F78B4", "#FF7F00", "#33A02C", "#E31A1C")
+# Order levels
+carbon.cpds$Horizon <- factor(carbon.cpds$Horizon,levels = c("Organic","Mineral"))
+
+# Plotting
+p <- ggplot(carbon.cpds,aes(x=bs1_class,y=value,fill=Treatment))+ geom_boxplot()+
+      ylab("Percentage") + xlab("") + scale_fill_manual(values=pal4) + 
+      theme(axis.text.x=element_text(size=12,face="bold",angle = 90,vjust = 0.7),
+            axis.text.y=element_text(size=18,face="bold"),
+            strip.text.x = element_text(size = 16),
+            legend.text=element_text(size=18))
+p + facet_grid(~Horizon)
+
+```
+
+# Ordination Plot:Treatment
+
+```{r,fig.width=8,fig.height=4}
+rm(list = ls())
+load("ficusPeakObj.Robj")
+peakObj <- group_designation(peakObj, main_effects=c("Treatment"))
+pcoaMat <- getPrincipalCoordinates(ftmsObj = peakObj,dist_metric = "bray")
+plotPrincipalCoordinates(pcoaMat,x=1,y=2,ftmsObj = peakObj )
+```
+
+
+# Ordination Plot:Treatment x Horizon
+
+```{r,fig.width=8,fig.height=4}
+peakObj <- group_designation(peakObj, main_effects=c("T_H"))
+#getGroupDF(peakObj)
+pcoaMat <- getPrincipalCoordinates(ftmsObj = peakObj,dist_metric = "bray")
+plotPrincipalCoordinates(pcoaMat,x=1,y=2,ftmsObj = peakObj )
+```
+
+# Venny Diagram
+
+```{r,fig.width=10}
+rm(list = ls())
+# load organic
+load("organicUnique.Robj")
+# get values
+organic.unique.df <- organic_unique$e_data
+# load mineral
+load("mineralUnique.Robj")
+# get values
+mineral.unique.df <- mineral_unique$e_data
+# Organic data
+All.organic <- organic.unique.df[organic.unique.df$uniqueness_nsamps %in% "Observed in Both","Mass"]
+# Mineral data
+All.mineral <- mineral.unique.df[mineral.unique.df$uniqueness_nsamps %in% "Observed in Both","Mass"]
+# Create List
+venn.data <- list(
+  Control.Mineral = c(mineral.unique.df[mineral.unique.df$uniqueness_nsamps %in% "Unique to Control","Mass"],All.mineral),
+  Control.Organic = c(organic.unique.df[organic.unique.df$uniqueness_nsamps %in% "Unique to Control","Mass"],All.organic),
+  Heated.Mineral = c(mineral.unique.df[mineral.unique.df$uniqueness_nsamps %in% "Unique to Heated","Mass"],All.mineral),
+  Heated.Organic = c(organic.unique.df[organic.unique.df$uniqueness_nsamps %in% "Unique to Heated","Mass"],All.organic)
+  )
+
+# Venn plot
+ggVennDiagram(venn.data,label_alpha = 0)
+```
+
+
+
+
