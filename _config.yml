@@ -8,3 +8,4 @@ include:
   - fticr_statistics_mineral.nb.html
   - fticr_statistics_organic.nb.html
   - fticr2kegg_organic.nb.html
+  - fticr_viz.nb.html
