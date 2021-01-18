@@ -82,6 +82,7 @@ carbon.cpds$Horizon <- factor(carbon.cpds$Horizon,levels = c("Organic","Mineral"
 
 # Plotting
 p <- ggplot(carbon.cpds,aes(x=bs1_class,y=value,fill=Treatment))+ geom_boxplot()+
+      stat_summary(fun.y=mean, geom="point", shape=20, size=3,position=position_dodge(width=0.75), color="red") +
       ylab("Percentage") + xlab("") + scale_fill_manual(values=pal4) + 
       theme(axis.text.x=element_text(size=12,face="bold",angle = 90,vjust = 0.7),
             axis.text.y=element_text(size=18,face="bold"),
@@ -213,6 +214,7 @@ carbon.cpds$Horizon <- factor(carbon.cpds$Horizon,levels = c("Organic","Mineral"
 
 # Plotting
 p <- ggplot(carbon.cpds,aes(x=ElComposition,y=value,fill=Treatment))+ geom_boxplot()+
+      stat_summary(fun.y=mean, geom="point", shape=20, size=5,position=position_dodge(width=0.75), color="red") +  
       ylab("Relative Frequency (%)") + xlab("") + scale_fill_manual(values=pal4) + 
       theme(axis.text.x=element_text(size=12,face="bold",angle = 90,vjust = 0.7),
             axis.text.y=element_text(size=18,face="bold"),
@@ -261,6 +263,7 @@ carbon.cpds$Horizon <- factor(carbon.cpds$Horizon,levels = c("Organic","Mineral"
 
 # Plotting
 p <- ggplot(carbon.cpds,aes(x=ElComposition,y=value,fill=Treatment))+ geom_boxplot()+
+      stat_summary(fun.y=mean, geom="point", shape=20, size=5,position=position_dodge(width=0.75), color="red") +  
       ylab("Relative Frequency (%)") + xlab("") + scale_fill_manual(values=pal4) + 
       theme(axis.text.x=element_text(size=12,face="bold",angle = 90,vjust = 0.7),
             axis.text.y=element_text(size=18,face="bold"),
@@ -308,6 +311,7 @@ carbon.cpds$Horizon <- factor(carbon.cpds$Horizon,levels = c("Organic","Mineral"
 
 # Plotting
 p <- ggplot(carbon.cpds,aes(x=ElComposition,y=value,fill=Treatment))+ geom_boxplot()+
+      stat_summary(fun.y=mean, geom="point", shape=20, size=5,position=position_dodge(width=0.75), color="red") +
       ylab("Relative Frequency (%)") + xlab("") + scale_fill_manual(values=pal4) + 
       theme(axis.text.x=element_text(size=12,face="bold",angle = 90,vjust = 0.7),
             axis.text.y=element_text(size=18,face="bold"),
@@ -355,6 +359,7 @@ carbon.cpds$Horizon <- factor(carbon.cpds$Horizon,levels = c("Organic","Mineral"
 
 # Plotting
 p <- ggplot(carbon.cpds,aes(x=ElComposition,y=value,fill=Treatment))+ geom_boxplot()+
+      stat_summary(fun.y=mean, geom="point", shape=20, size=5,position=position_dodge(width=0.75), color="red") +
       ylab("Relative Frequency (%)") + xlab("") + scale_fill_manual(values=pal4) + 
       theme(axis.text.x=element_text(size=12,face="bold",angle = 90,vjust = 0.7),
             axis.text.y=element_text(size=18,face="bold"),
@@ -402,6 +407,7 @@ carbon.cpds$Horizon <- factor(carbon.cpds$Horizon,levels = c("Organic","Mineral"
 
 # Plotting
 p <- ggplot(carbon.cpds,aes(x=ElComposition,y=value,fill=Treatment))+ geom_boxplot()+
+      stat_summary(fun.y=mean, geom="point", shape=20, size=5,position=position_dodge(width=0.75), color="red") +
       ylab("Relative Frequency (%)") + xlab("") + scale_fill_manual(values=pal4) + 
       theme(axis.text.x=element_text(size=12,face="bold",angle = 90,vjust = 0.7),
             axis.text.y=element_text(size=18,face="bold"),
