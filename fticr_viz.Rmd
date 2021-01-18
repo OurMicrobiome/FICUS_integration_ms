@@ -14,6 +14,7 @@ library("ggplot2")
 library("ape")
 library("ggVennDiagram")
 library("reshape2")
+library("plyr")
 ```
 
 
@@ -90,6 +91,14 @@ p + facet_grid(~Horizon)
 
 ```
 
+```{r}
+#stats on relative abundances #
+results.temp<-ddply(carbon.cpds,.(bs1_class,Horizon),function(x) summarize(x,Pvalue=t.test(value~Treatment,data=x,na.rm=TRUE,paired=F)$p.value))
+results.temp
+```
+
+
+
 # Ordination Plot:Treatment
 
 ```{r,fig.width=8,fig.height=4}
@@ -136,6 +145,278 @@ venn.data <- list(
 
 # Venn plot
 ggVennDiagram(venn.data,label_alpha = 0)
+```
+
+
+
+
+# Elements Plot
+
+
+### Load Peak Object
+
+```{r}
+load("ficusPeakObj.Robj")
+```
+
+
+### Binary Matrix
+
+```{r}
+# Set rownames
+edata <- peakObj$e_data
+rownames(edata) <- as.character(edata$Mass)
+edata$Mass <- NULL
+# Binary matrix
+edata.binary <- apply(edata,2,function(y)as.numeric(y>0))
+# Na's as zero
+edata.binary[is.na(edata.binary)] <- 0
+# As dataframe edata.binary
+edata.binary <- as.data.frame(edata.binary)
+# Add Mass to binary matrix
+edata.binary$Mass <- rownames(edata)
+# Add metadata to binary matrix
+tmp <- peakObj$e_meta[,c("Mass","ElComposition")] # save to tmp; direct merge isn't working
+str(tmp)
+# Merge 
+edata.binary <- merge(edata.binary,tmp,by="Mass",all = T)
+# Remove Mass column from df
+edata.binary$Mass <- NULL
+```
+
+
+```{r}
+# Carbon compounds #
+carbon.cpds <- aggregate(.~ElComposition,data=edata.binary,FUN=sum)
+# Transfor count to relative abundance #
+carbon.cpds[,-1] <- decostand(carbon.cpds[,-1],method = "total",MARGIN = 2)*100
+# Sum check
+colSums(carbon.cpds[,-1])
+```
+
+```{r}
+# melt df #
+carbon.cpds <- melt(carbon.cpds,variable.name = "Sample_ID")
+# Add sample info
+carbon.cpds <- merge(carbon.cpds,peakObj$f_data,by="Sample_ID")
+head(carbon.cpds)
+```
+
+## Elements Plot
+
+```{r,fig.width=15}
+# New color palette #
+pal4 <- c("#1F78B4", "#FF7F00", "#33A02C", "#E31A1C")
+
+# Order levels
+carbon.cpds$Horizon <- factor(carbon.cpds$Horizon,levels = c("Organic","Mineral"))
+
+# Plotting
+p <- ggplot(carbon.cpds,aes(x=ElComposition,y=value,fill=Treatment))+ geom_boxplot()+
+      ylab("Relative Frequency (%)") + xlab("") + scale_fill_manual(values=pal4) + 
+      theme(axis.text.x=element_text(size=12,face="bold",angle = 90,vjust = 0.7),
+            axis.text.y=element_text(size=18,face="bold"),
+            strip.text.x = element_text(size = 16),
+            legend.text=element_text(size=18))
+p + facet_grid(~Horizon)
+
+```
+
+### Elements Stats
+
+```{r}
+#stats on relative abundances #
+results.temp<-ddply(carbon.cpds,.(ElComposition,Horizon),function(x) summarize(x,Pvalue=t.test(value~Treatment,data=x,na.rm=TRUE,paired=F)$p.value))
+results.temp
+```
+
+
+
+## Nitrogen Compounds
+
+```{r}
+# Filter by N-containing elements
+tmp <- edata.binary[grep(pattern = "N",edata.binary$ElComposition),]
+# Carbon compounds #
+carbon.cpds <- aggregate(.~ElComposition,data=tmp,FUN=sum)
+# Transfor count to relative abundance #
+carbon.cpds[,-1] <- decostand(carbon.cpds[,-1],method = "total",MARGIN = 2)*100
+# Sum check
+colSums(carbon.cpds[,-1])
+```
+
+```{r}
+# melt df #
+carbon.cpds <- melt(carbon.cpds,variable.name = "Sample_ID")
+# Add sample info
+carbon.cpds <- merge(carbon.cpds,peakObj$f_data,by="Sample_ID")
+head(carbon.cpds)
+```
+
+### Nitrogen Elements: Plot
+
+```{r,fig.width=15}
+# Order levels
+carbon.cpds$Horizon <- factor(carbon.cpds$Horizon,levels = c("Organic","Mineral"))
+
+# Plotting
+p <- ggplot(carbon.cpds,aes(x=ElComposition,y=value,fill=Treatment))+ geom_boxplot()+
+      ylab("Relative Frequency (%)") + xlab("") + scale_fill_manual(values=pal4) + 
+      theme(axis.text.x=element_text(size=12,face="bold",angle = 90,vjust = 0.7),
+            axis.text.y=element_text(size=18,face="bold"),
+            strip.text.x = element_text(size = 16),
+            legend.text=element_text(size=18))
+p + facet_grid(~Horizon)
+
+```
+
+### Nitrogen Stats
+
+```{r}
+#stats on relative abundances #
+results.temp<-ddply(carbon.cpds,.(ElComposition,Horizon),function(x) summarize(x,Pvalue=t.test(value~Treatment,data=x,na.rm=TRUE,paired=F)$p.value))
+results.temp
+```
+
+
+## Phosphorus Compounds
+
+```{r}
+# Filter by N-containing elements
+tmp <- edata.binary[grep(pattern = "P",edata.binary$ElComposition),]
+# Carbon compounds #
+carbon.cpds <- aggregate(.~ElComposition,data=tmp,FUN=sum)
+# Transfor count to relative abundance #
+carbon.cpds[,-1] <- decostand(carbon.cpds[,-1],method = "total",MARGIN = 2)*100
+# Sum check
+colSums(carbon.cpds[,-1])
+```
+
+```{r}
+# melt df #
+carbon.cpds <- melt(carbon.cpds,variable.name = "Sample_ID")
+# Add sample info
+carbon.cpds <- merge(carbon.cpds,peakObj$f_data,by="Sample_ID")
+head(carbon.cpds)
+```
+
+### Phosphorus Elements: Plot
+
+```{r,fig.width=15}
+# Order levels
+carbon.cpds$Horizon <- factor(carbon.cpds$Horizon,levels = c("Organic","Mineral"))
+
+# Plotting
+p <- ggplot(carbon.cpds,aes(x=ElComposition,y=value,fill=Treatment))+ geom_boxplot()+
+      ylab("Relative Frequency (%)") + xlab("") + scale_fill_manual(values=pal4) + 
+      theme(axis.text.x=element_text(size=12,face="bold",angle = 90,vjust = 0.7),
+            axis.text.y=element_text(size=18,face="bold"),
+            strip.text.x = element_text(size = 16),
+            legend.text=element_text(size=18))
+p + facet_grid(~Horizon)
+
+```
+
+### Phosphorus Stats
+
+```{r}
+#stats on relative abundances #
+results.temp<-ddply(carbon.cpds,.(ElComposition,Horizon),function(x) summarize(x,Pvalue=t.test(value~Treatment,data=x,na.rm=TRUE,paired=F)$p.value))
+results.temp
+```
+
+
+## Sulfur Compounds
+
+```{r}
+# Filter by N-containing elements
+tmp <- edata.binary[grep(pattern = "S",edata.binary$ElComposition),]
+# Carbon compounds #
+carbon.cpds <- aggregate(.~ElComposition,data=tmp,FUN=sum)
+# Transfor count to relative abundance #
+carbon.cpds[,-1] <- decostand(carbon.cpds[,-1],method = "total",MARGIN = 2)*100
+# Sum check
+colSums(carbon.cpds[,-1])
+```
+
+```{r}
+# melt df #
+carbon.cpds <- melt(carbon.cpds,variable.name = "Sample_ID")
+# Add sample info
+carbon.cpds <- merge(carbon.cpds,peakObj$f_data,by="Sample_ID")
+head(carbon.cpds)
+```
+
+### Sulfur Elements: Plot
+
+```{r,fig.width=15}
+# Order levels
+carbon.cpds$Horizon <- factor(carbon.cpds$Horizon,levels = c("Organic","Mineral"))
+
+# Plotting
+p <- ggplot(carbon.cpds,aes(x=ElComposition,y=value,fill=Treatment))+ geom_boxplot()+
+      ylab("Relative Frequency (%)") + xlab("") + scale_fill_manual(values=pal4) + 
+      theme(axis.text.x=element_text(size=12,face="bold",angle = 90,vjust = 0.7),
+            axis.text.y=element_text(size=18,face="bold"),
+            strip.text.x = element_text(size = 16),
+            legend.text=element_text(size=18))
+p + facet_grid(~Horizon)
+
+```
+
+### Sulfur Stats
+
+```{r}
+#stats on relative abundances #
+results.temp<-ddply(carbon.cpds,.(ElComposition,Horizon),function(x) summarize(x,Pvalue=t.test(value~Treatment,data=x,na.rm=TRUE,paired=F)$p.value))
+results.temp
+```
+
+
+## Oxygen Compounds
+
+```{r}
+# Filter by N-containing elements
+tmp <- edata.binary[grep(pattern = "O",edata.binary$ElComposition),]
+# Carbon compounds #
+carbon.cpds <- aggregate(.~ElComposition,data=tmp,FUN=sum)
+# Transfor count to relative abundance #
+carbon.cpds[,-1] <- decostand(carbon.cpds[,-1],method = "total",MARGIN = 2)*100
+# Sum check
+colSums(carbon.cpds[,-1])
+```
+
+```{r}
+# melt df #
+carbon.cpds <- melt(carbon.cpds,variable.name = "Sample_ID")
+# Add sample info
+carbon.cpds <- merge(carbon.cpds,peakObj$f_data,by="Sample_ID")
+head(carbon.cpds)
+```
+
+### Oxygen Elements: Plot
+
+```{r,fig.width=15}
+# Order levels
+carbon.cpds$Horizon <- factor(carbon.cpds$Horizon,levels = c("Organic","Mineral"))
+
+# Plotting
+p <- ggplot(carbon.cpds,aes(x=ElComposition,y=value,fill=Treatment))+ geom_boxplot()+
+      ylab("Relative Frequency (%)") + xlab("") + scale_fill_manual(values=pal4) + 
+      theme(axis.text.x=element_text(size=12,face="bold",angle = 90,vjust = 0.7),
+            axis.text.y=element_text(size=18,face="bold"),
+            strip.text.x = element_text(size = 16),
+            legend.text=element_text(size=18))
+p + facet_grid(~Horizon)
+
+```
+
+### Oxygen Stats
+
+```{r}
+#stats on relative abundances #
+results.temp<-ddply(carbon.cpds,.(ElComposition,Horizon),function(x) summarize(x,Pvalue=t.test(value~Treatment,data=x,na.rm=TRUE,paired=F)$p.value))
+results.temp
 ```
 
 
