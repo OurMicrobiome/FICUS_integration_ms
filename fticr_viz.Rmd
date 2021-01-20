@@ -467,5 +467,15 @@ carbon.cpds <- merge(carbon.cpds,peakObj$f_data,by="Sample_ID")
 head(carbon.cpds)
 ```
 
+### CHON Subset 
+```{r}
+tmp <- carbon.cpds[carbon.cpds$ElComposition %in% "CHON",]
+tmp
+```
 
+### CHOSP Subset 
+```{r}
+tmp <- carbon.cpds[carbon.cpds$ElComposition %in% "CHOSP",]
+tmp
+```
 
