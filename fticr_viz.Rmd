@@ -425,6 +425,47 @@ results.temp<-ddply(carbon.cpds,.(ElComposition,Horizon),function(x) summarize(x
 results.temp
 ```
 
+### Map Elements to Compounds
+
+```{r}
+# Set rownames
+edata <- peakObj$e_data
+rownames(edata) <- as.character(edata$Mass)
+edata$Mass <- NULL
+# Binary matrix
+edata.binary <- apply(edata,2,function(y)as.numeric(y>0))
+# Na's as zero
+edata.binary[is.na(edata.binary)] <- 0
+# As dataframe edata.binary
+edata.binary <- as.data.frame(edata.binary)
+# Add Mass to binary matrix
+edata.binary$Mass <- rownames(edata)
+# Add metadata to binary matrix
+tmp <- peakObj$e_meta[,c("Mass","bs1_class","ElComposition")] # save to tmp; direct merge isn't working
+str(tmp)
+# Merge 
+edata.binary <- merge(edata.binary,tmp,by="Mass",all = T)
+# Remove Mass column from df
+edata.binary$Mass <- NULL
+```
+
+
+```{r}
+# Carbon compounds #
+carbon.cpds <- aggregate(.~bs1_class*ElComposition,data=edata.binary,FUN=sum)
+# Transfor count to relative abundance #
+carbon.cpds[,c(-1,-2)] <- decostand(carbon.cpds[,c(-1,-2)],method = "total",MARGIN = 2)*100
+# Sum check
+colSums(carbon.cpds[,c(-1,-2)])
+```
+
+```{r}
+# melt df #
+carbon.cpds <- melt(carbon.cpds,variable.name = "Sample_ID")
+# Add sample info
+carbon.cpds <- merge(carbon.cpds,peakObj$f_data,by="Sample_ID")
+head(carbon.cpds)
+```
 
 
 
